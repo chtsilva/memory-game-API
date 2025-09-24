@@ -1,14 +1,22 @@
 package com.memory_game.game.model.response;
 
+import java.time.LocalDateTime;
+
 public class ApiResponse<T> {
+    private LocalDateTime timestamp;
     private String message;
     private T data;
     private boolean success;
 
     public ApiResponse(String message, boolean success, T data) {
+        this.timestamp = LocalDateTime.now();
         this.message = message;
         this.success = success;
         this.data = data;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
 
     public T getData() {
@@ -19,15 +27,8 @@ public class ApiResponse<T> {
         return message;
     }
 
-    // public void setMessage(String message) {
-    //     this.message = message;
-    // }
-
     public boolean isSuccess() {
         return success;
     }
 
-    // public void setSuccess(boolean success) {
-    //     this.success = success;
-    // }
 }

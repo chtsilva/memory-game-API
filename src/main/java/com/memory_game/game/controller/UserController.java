@@ -9,6 +9,7 @@ import com.memory_game.game.model.User;
 import com.memory_game.game.model.response.ApiResponse;
 import com.memory_game.game.service.UserService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,14 +27,22 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<ApiResponse<List<User>>> getAllUsers() {
+
+        try {
+            List<User> users = userService.getAllUsers();
+            return ResponseEntity.ok(new ApiResponse<List<User>>("Users retrieved successfully", true, users));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessage(), false, null));
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserByID(@PathVariable Long id) {
-        return userService.getUserById(id).map(user -> ResponseEntity.ok(user))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ApiResponse<User>> getUserByID(@PathVariable Long id) throws Exception {
+        return userService.getUserById(id)
+                .map(user -> ResponseEntity.ok(new ApiResponse<User>("User retrieved successfully", true, user)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>("User not found with id: " + id, false, null)));
     }
 
     @PostMapping("")
@@ -47,9 +56,11 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        return userService.deleteUser(id) ? ResponseEntity.ok("User deleted successfully")
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable Long id) {
+        return userService.deleteUser(id)
+                ? ResponseEntity.ok(new ApiResponse<>("User deleted successfully", true, null))
+                : ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>("User not found with id: " + id, false, null));
     }
 
 }
